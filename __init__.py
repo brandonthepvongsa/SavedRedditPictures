@@ -1,5 +1,5 @@
 import praw, config
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for
 from imgurpython import ImgurClient
 
 app = Flask(__name__)
@@ -55,7 +55,7 @@ def check_limit_set(limit):
 @app.route("/")
 def hello():
     if r.is_logged_in():
-        return redirect("/explore")
+        return redirect(url_for('explore'))
     else:
         return render_template('hello.html')
 
@@ -71,19 +71,19 @@ def process_form():
     except praw.errors.InvalidUserPass:
         return render_template('hello.html', failed_login=True)
 
-    return redirect("/explore?limit=" + str(limit) + "&nsfw=False")
+    return redirect(url_for('explore') + "?limit=" + str(limit) + "&nsfw=False")
 
 
 @app.route("/logout")
 def logout():
     r.clear_authentication()
-    return redirect("/")
+    return redirect(url_for('hello'))
 
 
 @app.route("/explore", methods=['GET'])
 def explore():
     if r.is_logged_in() is False:
-        return redirect("/")
+        return redirect(url_for('hello'))
 
     limit = check_limit_set(request.args.get('limit'))
     nsfw = request.args.get('nsfw') == 'True'
