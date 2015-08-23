@@ -45,11 +45,6 @@ def check_album(url):
     return '/a/' in url
 
 
-def check_logged_in():
-    if r.is_logged_in() is False:
-        return redirect("/")
-
-
 def check_limit_set(limit):
     if limit:
         return int(limit)
@@ -87,7 +82,8 @@ def logout():
 
 @app.route("/explore", methods=['GET'])
 def explore():
-    check_logged_in()
+    if r.is_logged_in() is False:
+        return redirect("/")
 
     limit = check_limit_set(request.args.get('limit'))
     nsfw = request.args.get('nsfw') == 'True'
