@@ -9,12 +9,13 @@ r = praw.Reddit(user_agent='redpics')
 client = ImgurClient(config.client_id, config.client_secret)
 
 
-def fetch_saved(limit):
+def fetch_saved(limit, nsfw):
     saved_posts = r.user.get_saved(limit=limit)
     result = []
 
     for post in saved_posts:
-        if hasattr(post, 'domain') and hasattr(post, 'url') and 'imgur.com' in post.domain and post.over_18 == config.over_18:
+        if (hasattr(post, 'domain') and hasattr(post, 'url') and 'imgur.com' in post.domain and
+                post.over_18 == nsfw):
             temp = {}
             temp['url'] = post.url
             temp['thumbnail'] = set_thumbnail(post)
@@ -26,7 +27,7 @@ def set_thumbnail(post):
     post_id = post.url.rpartition('/')[2]
     if 'i.imgur.com' in post.url:
         result = post.url
-    elif post.media != None:
+    elif post.media is not None:
         result = post.media['oembed']['thumbnail_url']
     elif check_album(post.url):
         image_id = client.get_album(post_id).cover
@@ -49,6 +50,13 @@ def check_logged_in():
         return redirect("/")
 
 
+def check_limit_set(limit):
+    if limit:
+        return int(limit)
+    else:
+        return int(config.default_limit)
+
+
 @app.route("/")
 def hello():
     if r.is_logged_in():
@@ -61,13 +69,14 @@ def hello():
 def process_form():
     username = request.form['username'].lower()
     password = request.form['password'].lower()
-    limit = int(request.form['limit'])
+
+    limit = check_limit_set(request.form['limit'])
     try:
         r.login(username, password, disable_warning=True)
     except praw.errors.InvalidUserPass:
         return render_template('hello.html', failed_login=True)
 
-    return redirect("/explore")
+    return redirect("/explore?limit=" + str(limit) + "&nsfw=False")
 
 
 @app.route("/logout")
@@ -76,10 +85,13 @@ def logout():
     return redirect("/")
 
 
-@app.route("/explore")
+@app.route("/explore", methods=['GET'])
 def explore():
     check_logged_in()
-    posts = fetch_saved(25)
+
+    limit = check_limit_set(request.args.get('limit'))
+    nsfw = request.args.get('nsfw') == 'True'
+    posts = fetch_saved(limit, nsfw)
     return render_template('explore.html', posts=posts)
 
 if __name__ == "__main__":
