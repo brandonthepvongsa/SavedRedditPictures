@@ -5,7 +5,7 @@ from imgurpython import ImgurClient
 app = Flask(__name__)
 
 r = praw.Reddit(user_agent='redpics')
-r.set_oauth_app_info(client_id='Qmc7aBX5drEIdw', client_secret='RVnGX1bX3f_MteCBMda9vMoWluI', redirect_uri='http://127.0.0.1:5000/authorize_callback')
+r.set_oauth_app_info(client_id='Qmc7aBX5drEIdw', client_secret='RVnGX1bX3f_MteCBMda9vMoWluI', redirect_uri='config.reddit_auth_url')
 client = ImgurClient(config.client_id, config.client_secret)
 
 
