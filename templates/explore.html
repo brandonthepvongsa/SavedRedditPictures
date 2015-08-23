@@ -1,0 +1,13 @@
+<!doctype html>
+<head>
+<title>Redpics</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='stylesheet.css') }}">
+</head>
+<body>
+	<p>Logged in | <a href="/logout">log out</a></p>
+	{% for post in posts %}
+	  <div class="post">
+		  <a href="{{post['url']}}"><img src="{{ post['thumbnail'] }}" width="200px" height="300px"/></a>
+	  </div>
+	{% endfor %}
+</body>

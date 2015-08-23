@@ -3,15 +3,7 @@
 <title>Redpics</title>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='stylesheet.css') }}">
 </head>
-
-{% if logged_in %}
-	<p>Logged in as: {{ username }} || <a href="/logout">log out</a></p>
-	{% for post in posts %}
-	  <div class="post">
-		  <a href="{{post['url']}}"><img src="{{ post['thumbnail'] }}" width="200px" height="300px"/></a>
-	  </div>
-	{% endfor %}
-{% else %}
+<body>
 	{% if failed_login %}
 	<p>Wrong username or password</p>
 	{% endif %}
@@ -26,4 +18,4 @@
 			<dd><input type="submit" value="login"></dd>
 		</dl>
 	</form>
-{% endif %}
+</body>
