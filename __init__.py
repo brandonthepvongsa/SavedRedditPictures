@@ -4,10 +4,6 @@ from imgurpython import ImgurClient
 
 app = Flask(__name__)
 
-r = praw.Reddit(user_agent='redpics')
-r.set_oauth_app_info(client_id=config.reddit_client_id, client_secret=config.reddit_client_secret, redirect_uri=config.reddit_auth_url)
-client = ImgurClient(config.client_id, config.client_secret)
-
 
 def fetch_saved(limit, nsfw):
     user = r.get_me()
@@ -110,5 +106,9 @@ def explore():
 
 if __name__ == "__main__":
     app.secret_key = config.reddit_secret_api_key
+
+    r = praw.Reddit(user_agent='redpics')
+    r.set_oauth_app_info(client_id=config.reddit_client_id, client_secret=config.reddit_client_secret, redirect_uri=config.reddit_auth_url)
+    client = ImgurClient(config.client_id, config.client_secret)
     app.debug = True
     app.run()
