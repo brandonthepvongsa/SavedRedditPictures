@@ -1,16 +1,17 @@
-import praw, config
-from flask import Flask, render_template, request, redirect, url_for
+import praw, config, webbrowser
+from flask import Flask, render_template, request, redirect, url_for, session
 from imgurpython import ImgurClient
 
 app = Flask(__name__)
 
 r = praw.Reddit(user_agent='redpics')
-
+r.set_oauth_app_info(client_id='Qmc7aBX5drEIdw', client_secret='RVnGX1bX3f_MteCBMda9vMoWluI', redirect_uri='http://127.0.0.1:5000/authorize_callback')
 client = ImgurClient(config.client_id, config.client_secret)
 
 
 def fetch_saved(limit, nsfw):
-    saved_posts = r.user.get_saved(limit=limit)
+    user = r.get_me()
+    saved_posts = user.get_saved(limit=limit)
     result = []
 
     for post in saved_posts:
@@ -54,7 +55,7 @@ def check_limit_set(limit):
 
 @app.route("/")
 def hello():
-    if r.is_logged_in():
+    if r.is_oauth_session():
         return redirect(url_for('explore'))
     else:
         return render_template('hello.html')
@@ -74,6 +75,23 @@ def process_form():
     return redirect(url_for('explore') + "?limit=" + str(limit) + "&nsfw=False")
 
 
+@app.route("/login")
+def login():
+    url = r.get_authorize_url('redpics', 'identity history', True)
+    return redirect(url)
+
+
+@app.route("/authorize_callback", methods=['GET'])
+def authorize_callback():
+    code = request.args.get('code')
+
+    try:
+        access_information = r.get_access_information(code)
+        return redirect(url_for('explore'))
+    except:
+        return redirect(url_for('hello'))
+
+
 @app.route("/logout")
 def logout():
     r.clear_authentication()
@@ -82,7 +100,7 @@ def logout():
 
 @app.route("/explore", methods=['GET'])
 def explore():
-    if r.is_logged_in() is False:
+    if r.is_oauth_session() is False:
         return redirect(url_for('hello'))
 
     limit = check_limit_set(request.args.get('limit'))
@@ -91,5 +109,6 @@ def explore():
     return render_template('explore.html', posts=posts)
 
 if __name__ == "__main__":
+    app.secret_key = config.reddit_secret_api_key
     app.debug = True
     app.run()
