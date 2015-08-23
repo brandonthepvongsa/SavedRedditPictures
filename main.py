@@ -9,8 +9,8 @@ r = praw.Reddit(user_agent='redpics')
 
 client = ImgurClient(config.client_id, config.client_secret)
 
-def fetch_saved():
-	savedposts = r.user.get_saved(limit=config.limit)
+def fetch_saved(limit):
+	savedposts = r.user.get_saved(limit=limit)
 	result = []
 
 	for post in savedposts:
@@ -51,13 +51,13 @@ def hello():
 def process_form():
 	username = request.form['username'].lower()
 	password = request.form['password'].lower()
-	
+	limit = int(request.form['limit'])
 	try:
 		r.login(username, password, disable_warning=True)
 	except praw.errors.InvalidUserPass:
 		return render_template('hello.html', failed_login=True)
 
-	posts = fetch_saved()
+	posts = fetch_saved(limit)
 	return render_template('hello.html', posts=posts, logged_in=True, username=username)
 
 @app.route("/logout")
