@@ -10,7 +10,7 @@ r = praw.Reddit(user_agent='redpics')
 client = ImgurClient(config.client_id, config.client_secret)
 
 def fetch_saved():
-	savedposts = r.user.get_saved(limit=50)
+	savedposts = r.user.get_saved(limit=config.limit)
 	result = []
 
 	for post in savedposts:
@@ -32,7 +32,10 @@ def set_thumbnail(post):
 		image_id = client.get_album(post_id).cover
 		result = client.get_image(image_id).link
 	else:
-		result = client.get_image(post_id).link
+		try:
+			result = client.get_image(post_id).link
+		except:
+			result = post.thumbnail
 
 	return result
 
